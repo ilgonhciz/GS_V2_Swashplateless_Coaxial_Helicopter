@@ -115,7 +115,7 @@ void loop() {
       timer = micros();
       }
     computeControl();
-    manipulateSpeed();
+    manipulateSpeed_Sinus();
     //manipulateSpeed_Sinus();
     //getrpm();
 
@@ -148,22 +148,26 @@ void getTPRY_Omnibus(){
 
 
 void computeControl(){
-  int minpwmValue = 145;
+  int minpwmValue = 140;
+  pwmValue_motor_1 = 128 + 128 * normalizeThrottle(throttle_motor_1);
+  pwmValue_motor_2 = 128 + 128*1.3 * normalizeThrottle(throttle_motor_2);
+  
   if (pwmValue_motor_1 > minpwmValue){
-    modulation_offset = (pwmValue_motor_1-minpwmValue) * sqrt(pow(normalizePRY(pitch),2) + pow(normalizePRY(roll),2) );
-  }
-  controlAngle = atan2(normalizePRY(pitch), -normalizePRY(roll));  
+    modulation_offset = 0.7*(pwmValue_motor_1-minpwmValue) * sqrt(pow(normalizePRY(pitch),2) + pow(normalizePRY(roll),2) );
+  }else{
+    modulation_offset = 0;
+    }
+  controlAngle = atan2(-normalizePRY(pitch), -normalizePRY(roll));  //- for pitch to correct the upside down effect
   
   if (controlAngle > 0 ){
     angle_offset = 180*float(controlAngle)/PI;
   }else{
     angle_offset = 360 + 180*float( controlAngle)/PI;
     }
-  pwmValue_motor_1 = 128 + 128 * normalizeThrottle(throttle_motor_1);
-  pwmValue_motor_2 = 128 + 128*1.3 * normalizeThrottle(throttle_motor_2);
+
   }
 
-int calibration_offset = 80;
+int calibration_offset = 100;
 
 void manipulateSpeed(){
     //changing speed using the serial inputs 
